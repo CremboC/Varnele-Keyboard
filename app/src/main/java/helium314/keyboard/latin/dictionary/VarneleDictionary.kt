@@ -80,7 +80,7 @@ class VarneleDictionary(
             // grammar says this valid word is wrong here: "prieš pora" -> "porą"
             r.contextFixes.forEachIndexed { i, c ->
                 out.add(
-                    if (isSure(r, i)) info(c.word, CONTEXT_FIX_SCORE - i, AUTOCORRECT_KIND)
+                    if (c.level == 2) info(c.word, CONTEXT_FIX_SCORE - i, AUTOCORRECT_KIND)
                     else info(c.word, CONTEXT_HINT_SCORE - i, SuggestedWordInfo.KIND_CORRECTION)
                 )
             }
@@ -91,18 +91,13 @@ class VarneleDictionary(
         val s = r.suggestions
         var previous = Int.MAX_VALUE
         s.forEachIndexed { i, c ->
-            // context (a grammar rule) already chose the order, or the top one clearly wins
-            val clearlyBest = i == 0 && isClearlyBest(r)
             // whole-word key slip: the user enabled it and nothing else matched, so the most
             // likely word is applied; the other guesses stay in the strip
             val keySlipGuess = r.keyShift && i == 0
-            val kind = when {
-                keySlipGuess ->
-                    SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
-                clearlyBest && c.diacriticOnly -> AUTOCORRECT_KIND
+            val kind = when (c.level) {
+                2 -> AUTOCORRECT_KIND
                 // missing diacritics are free: zodzou -> žodžių is one typo, not four edits
-                c.typoCost <= MAX_AUTOCORRECT_TYPOS ->
-                    SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
+                1 -> SuggestedWordInfo.KIND_CORRECTION or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
                 else -> SuggestedWordInfo.KIND_CORRECTION
             }
             // keep the strip in Varnelė's order: each score strictly below the previous one
@@ -232,7 +227,7 @@ class VarneleDictionary(
     private fun score(typed: String, c: Native.Candidate): Int {
         val target = when {
             c.diacriticOnly -> 1.0
-            c.typoCost <= MAX_AUTOCORRECT_TYPOS -> 0.9 - 0.4 * c.typoCost   // one typo: ~0.5
+            c.level >= 1 -> 0.9 - 0.4 * c.typoCost                           // one typo: ~0.5
             else -> 0.05                                                     // shown, not applied
         }
         val weight = 1.0 - editDistance(typed.lowercase(), c.word.lowercase()).toDouble() / c.word.length
@@ -351,7 +346,6 @@ class VarneleDictionary(
         private const val VALID_SCORE = 1_200_000
         private const val CONTEXT_FIX_SCORE = 1_300_000   // above the typed word: autocorrects
         private const val CONTEXT_HINT_SCORE = 1_100_000  // below it: shown, not applied
-        private const val CLEAR_MARGIN = 0.08
         private const val GESTURE_CANDIDATES = 5
         private const val PREDICTIONS = 5
         private const val PREDICTION_SCORE = 1_000_000  // predictions keep Varnelė's order
@@ -359,7 +353,6 @@ class VarneleDictionary(
         private const val WHITELIST_FLOOR = 1_300_000
         // every letter differs, so HeliBoard's distance weight is tiny: needs a large raw score
         private const val KEY_SLIP_SCORE = 1_900_000_000
-        private const val MAX_AUTOCORRECT_TYPOS = 1.0
         private const val AUTOCORRECT_KIND =
             SuggestedWordInfo.KIND_WHITELIST or SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
 
@@ -387,39 +380,6 @@ class VarneleDictionary(
             for (old in out.getSpans(0, out.length, SuggestionSpan::class.java)) out.removeSpan(old)
             out.setSpan(span, 0, out.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             return out
-        }
-
-        /**
-         * A context fix of a valid word that is applied without asking: one that only changes
-         * diacritics, or the subject rule's verb form right after a personal pronoun
-         * (aš buvo -> buvau), which is almost never intended, or a never-seen short word one
-         * key from a common one (kak -> kai), or in formal mode the standard form of a spoken
-         * one (valgyt -> valgyti), or the word of a phrase that doesn't agree with the rest of it
-         * (viena nukritusią sagutė -> nukritusi).
-         */
-        private fun isSure(r: Native.WordResult, i: Int): Boolean {
-            val c = r.contextFixes.getOrNull(i) ?: return false
-            return c.diacriticOnly || (i == 0 && r.contextRule in SURE_RULES)
-        }
-
-        /** context rules whose first fix may change letters, not only diacritics */
-        val SURE_RULES = setOf("subject", "rare", "formal", "phrase")
-
-        /** context (a grammar rule) already chose the order, or the top suggestion clearly wins */
-        private fun isClearlyBest(r: Native.WordResult): Boolean {
-            val s = r.suggestions
-            return s.isNotEmpty() && (r.contextRule == "context" || s.size == 1 || s[1].cost - s[0].cost >= CLEAR_MARGIN)
-        }
-
-        /**
-         * The fix that is safe to apply without asking (the same ones getSuggestions marks
-         * whitelisted): only diacritics change and it is the clear choice, or a subject-verb fix.
-         * Null if none.
-         */
-        fun confidentFix(r: Native.WordResult): String? = when {
-            r.isValid -> r.contextFixes.firstOrNull()?.takeIf { isSure(r, 0) }?.word
-            isClearlyBest(r) && r.suggestions[0].diacriticOnly && !r.keyShift -> r.suggestions[0].word
-            else -> null
         }
     }
 }

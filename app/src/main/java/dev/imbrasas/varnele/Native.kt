@@ -12,7 +12,8 @@ import org.json.JSONObject
  */
 object Native {
     /** cost: Varnelė's ranking (lower is better); typoCost: edits ignoring diacritics (0 = only diacritics differ) */
-    data class Candidate(val word: String, val cost: Double, val typoCost: Double) {
+    /** level: 2 applied without asking, 1 autocorrect may take it, 0 only offered (Varnelė decides) */
+    data class Candidate(val word: String, val cost: Double, val typoCost: Double, val level: Int) {
         val diacriticOnly get() = typoCost == 0.0
     }
 
@@ -107,18 +108,34 @@ object Native {
         if (!available) null else ghostNative(context, typed, formal).ifEmpty { null }
 
     @JvmStatic
-    private external fun softNative(committed: String, typed: String): String
+    private external fun fixRememberNative(before: String, base: Int, typed: String, committed: String)
+
+    @JvmStatic
+    private external fun fixUndoneNative()
+
+    @JvmStatic
+    private external fun fixNative(before: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean, formal: Boolean): String
+
+    /** Autocorrect committed [committed] for [typed]; [before] ends with it, [base] is where it starts in the field. */
+    fun fixRemember(before: String, base: Int, typed: String, committed: String) {
+        if (available) fixRememberNative(before, base, typed, committed)
+    }
+
+    /** The last autocorrection was undone: its word stays as typed. */
+    fun fixUndone() {
+        if (available) fixUndoneNative()
+    }
 
     /**
-     * The keyboard's own diacritics decided again once later words are typed: [committed] is the
-     * sentence as it stands, [typed] the same with the words the keyboard gave diacritics as they
-     * were typed ("kad žiemą žymiai rimtesne" / "kad ziema …"). Returns (start, end, word) to put in
-     * their place ("žiema"), UTF-16 offsets.
+     * The sentence fixer on the text before the cursor: how many UTF-16 units to delete before the
+     * cursor and what to put there, or null if nothing changes.
      */
-    fun soft(committed: String, typed: String): List<Triple<Int, Int, String>> {
-        if (!available) return emptyList()
-        val a = JSONArray(softNative(committed, typed))
-        return (0 until a.length()).map { a.getJSONObject(it).let { o -> Triple(o.getInt("start"), o.getInt("end"), o.getString("word")) } }
+    fun fixSentence(before: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean): Pair<Int, String>? {
+        if (!available) return null
+        val o = JSONObject(fixNative(before, base, picked, earlier, commas, formal))
+        val delete = o.getInt("delete")
+        val insert = o.getString("insert")
+        return if (delete == 0 && insert.isEmpty()) null else delete to insert
     }
 
     @JvmStatic private external fun userLoadNative(path: String)
@@ -207,7 +224,7 @@ object Native {
         val o = JSONObject(word(word, context, after, keyShift, formal))
         fun list(a: JSONArray) = (0 until a.length()).map {
             val c = a.getJSONObject(it)
-            Candidate(c.getString("w"), c.getDouble("cost"), c.getDouble("fcost"))
+            Candidate(c.getString("w"), c.getDouble("cost"), c.getDouble("fcost"), c.getInt("level"))
         }
         return WordResult(
             o.getString("status"), list(o.getJSONArray("suggestions")),
