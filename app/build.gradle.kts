@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "dev.imbrasas.varnele.keyboard"
-        minSdk = 21
+        minSdk = 24 // upstream: 21; Play's automatic protection needs 24
         targetSdk = 37
         // Our own version (not upstream's 4.3-beta1 / 4300). versionCode = 10000 + CI run number
         // (set by .github/workflows/varnele-release.yml as VERSION_CODE), 10000 for local builds.
