@@ -4,6 +4,8 @@ name: Varnelė release build
 # versionCode = 10000 + run number (see app/build.gradle.kts).
 # Secrets: VARNELE_KEYSTORE_BASE64, VARNELE_KEYSTORE_PASSWORD, VARNELE_KEY_ALIAS, VARNELE_KEY_PASSWORD,
 # and VARNELE_DEPLOY_KEY (read-only deploy key of CremboC/varnele) while that repo is private.
+# VARNELE_PLAY_SERVICE_ACCOUNT_JSON (a service account with "Release apps to testing tracks" on the app):
+# every build goes to Play's internal testing track; without it the build only keeps the artifacts.
 
 on:
   push:
@@ -16,6 +18,7 @@ concurrency:
 
 env:
   NDK_VERSION: 28.0.13004108 # keep equal to android.ndkVersion in app/build.gradle.kts
+  PLAY_UPLOAD: ${{ secrets.VARNELE_PLAY_SERVICE_ACCOUNT_JSON != '' }}
 
 jobs:
   build:
@@ -99,6 +102,18 @@ jobs:
           name: VarneleKlaviatura-${{ env.VERSION_CODE }}-apk
           path: HeliBoard/app/build/outputs/apk/nouserlib/*.apk
           if-no-files-found: error
+
+      - name: Upload to Google Play (internal testing)
+        if: env.PLAY_UPLOAD == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.VARNELE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: dev.imbrasas.varnele.keyboard
+          releaseFiles: HeliBoard/app/build/outputs/bundle/nouserlib/*.aab
+          releaseName: ${{ env.VERSION_CODE }}
+          mappingFile: HeliBoard/app/build/outputs/mapping/nouserlib/mapping.txt
+          track: internal
+          status: completed
 
       - name: Remove keystore
         if: always()
