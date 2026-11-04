@@ -87,4 +87,6 @@ object SettingsWithoutKey {
     const val CUSTOM_FONT = "custom_font"
     const val CUSTOM_EMOJI_FONT = "custom_emoji_font"
     const val VARNELE_FORGET = "varnele_forget"
+    const val VARNELE_TAP_LOG_EXPORT = "varnele_tap_log_export"
+    const val VARNELE_TAP_LOG_DELETE = "varnele_tap_log_delete"
 }

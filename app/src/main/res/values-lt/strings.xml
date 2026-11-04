@@ -449,4 +449,13 @@
     <string name="varnele_forget_confirm">Ištrinti visus iš jūsų rašymo išmoktus žodžius ir frazes?</string>
     <string name="varnele_forget_button">Pamiršti</string>
     <string name="varnele_formal_summary">Šnekamosios formos taisomos į bendrines ir niekada nesiūlomos, rašant ar braukiant (valgyt → valgyti, einam → einame)</string>
+    <string name="settings_category_varnele_accuracy">Rašymo tikslumas</string>
+    <string name="varnele_tap_log">Įrašyti rašymo tikslumą</string>
+    <string name="varnele_tap_log_summary">Įsiminti, kur kiekvienas palietimas patenka ant norėto klavišo, kad klaviatūrą būtų galima pritaikyti jūsų pirštams. Eilutės sumaišomos, todėl teksto atkurti negalima; lieka šiame telefone, kol jų neeksportuojate; ne inkognito režimu, ne slaptažodžiuose ir adresuose</string>
+    <string name="varnele_tap_log_export">Eksportuoti rašymo tikslumo duomenis</string>
+    <string name="varnele_tap_log_export_summary">Įrašyta palietimų: %d</string>
+    <string name="varnele_tap_log_none">Dar nieko neįrašyta</string>
+    <string name="varnele_tap_log_delete">Ištrinti rašymo tikslumo duomenis</string>
+    <string name="varnele_tap_log_delete_confirm">Ištrinti visus įrašytus palietimus?</string>
+    <string name="varnele_tap_log_delete_button">Ištrinti</string>
 </resources>

@@ -168,6 +168,15 @@
     <string name="varnele_forget_summary">Delete everything learned from your writing</string>
     <string name="varnele_forget_confirm">Delete all words and phrases learned from your writing?</string>
     <string name="varnele_forget_button">Forget</string>
+    <string name="settings_category_varnele_accuracy">Typing accuracy</string>
+    <string name="varnele_tap_log">Record typing accuracy</string>
+    <string name="varnele_tap_log_summary">Note where each tap lands on the key it was meant for, to tune the keyboard to your fingers. Rows are shuffled, so no text can be read back; stays on this phone until you export it; not in incognito mode, passwords or addresses</string>
+    <string name="varnele_tap_log_export">Export typing accuracy data</string>
+    <string name="varnele_tap_log_export_summary">%d taps recorded</string>
+    <string name="varnele_tap_log_none">Nothing recorded yet</string>
+    <string name="varnele_tap_log_delete">Delete typing accuracy data</string>
+    <string name="varnele_tap_log_delete_confirm">Delete all recorded taps?</string>
+    <string name="varnele_tap_log_delete_button">Delete</string>
     <string name="varnele_key_shift">Fix whole-word key slips</string>
     <string name="varnele_key_shift_summary">If a word is not recognised at all, try neighbouring keys for every letter (fofrkua → didelis)</string>
     <!-- Option to enable auto correction for for capitalized suggestions (by pressing shift) -->

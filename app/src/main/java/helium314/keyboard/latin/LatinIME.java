@@ -63,6 +63,7 @@ import helium314.keyboard.latin.common.ViewOutlineProviderUtilsKt;
 import helium314.keyboard.latin.define.DebugFlags;
 import helium314.keyboard.latin.inputlogic.InputLogic;
 import helium314.keyboard.latin.inputlogic.VarneleUserLm;
+import helium314.keyboard.latin.inputlogic.VarneleTapLog;
 import helium314.keyboard.latin.personalization.PersonalizationHelper;
 import helium314.keyboard.latin.dictionary.VarneleDictionary;
 import helium314.keyboard.latin.settings.Defaults;
@@ -543,6 +544,7 @@ public class LatinIME extends InputMethodService implements
     public void onCreate() {
         mSettings.startListener();
         VarneleUserLm.INSTANCE.init(this);
+        VarneleTapLog.INSTANCE.init(this);
         KeyboardIconsSet.Companion.getInstance().loadIcons(this);
         mRichImm = RichInputMethodManager.getInstance();
         AudioAndHapticFeedbackManager.init(this);
@@ -1047,6 +1049,7 @@ public class LatinIME extends InputMethodService implements
         Log.i(TAG, "onFinishInput");
         VarneleUserLm.INSTANCE.commit(false);
         VarneleUserLm.INSTANCE.save();
+        VarneleTapLog.INSTANCE.onFinishInput();
 
         mDictionaryFacilitator.onFinishInput();
         final MainKeyboardView mainKeyboardView = mKeyboardSwitcher.getMainKeyboardView();

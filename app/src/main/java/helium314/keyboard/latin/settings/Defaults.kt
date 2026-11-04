@@ -49,7 +49,7 @@ object Defaults {
     fun PREF_ICON_STYLE(prefs: SharedPreferences) = prefs.getString(Settings.PREF_THEME_STYLE, PREF_THEME_STYLE)!!
     const val PREF_ACCENT_SHIFTED_ICON = false
     const val PREF_THEME_COLORS = KeyboardTheme.THEME_LIGHT
-    const val PREF_THEME_COLORS_NIGHT = KeyboardTheme.THEME_DARK
+    const val PREF_THEME_COLORS_NIGHT = KeyboardTheme.THEME_BLACK   // Varnelė Klaviatūra default: black for OLED
     const val PREF_THEME_KEY_BORDERS = true   // Varnelė Klaviatūra default
     @JvmField
     val PREF_THEME_DAY_NIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
@@ -66,7 +66,9 @@ object Defaults {
     var PREF_POPUP_ON = true
     const val PREF_AUTO_CORRECTION = true
     const val PREF_MORE_AUTO_CORRECTION = false
-    const val PREF_AUTO_CORRECT_CONFIDENCE = 0.24f
+    const val PREF_AUTO_CORRECT_CONFIDENCE = 0.5f   // Varnelė Klaviatūra default (upstream 0.24): more fixes in English
+    /** Lithuanian ignores the slider: Varnelė's suggestion scores are calibrated for upstream's 0.24 */
+    const val VARNELE_AUTO_CORRECT_CONFIDENCE = 0.24f
     const val PREF_AUTOCORRECT_SHORTCUTS = true
     const val PREF_VARNELE_KEY_SHIFT = true
     const val PREF_VARNELE_FORMAL = false
@@ -75,6 +77,7 @@ object Defaults {
     const val PREF_VARNELE_FIX_EARLIER = true
     const val PREF_VARNELE_UNDERLINE = true
     const val PREF_VARNELE_GHOST_NEXT = true
+    const val PREF_VARNELE_TAP_LOG = false
     const val PREF_BACKSPACE_REVERTS_AUTOCORRECT = true
     const val PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION = true
     const val PREF_CENTER_SUGGESTION_TEXT_TO_ENTER = false
@@ -101,7 +104,8 @@ object Defaults {
     @JvmField
     val PREF_SPLIT_SPACER_SCALE = Array(4) { DEFAULT_SIZE_SCALE }
     @JvmField
-    val PREF_KEYBOARD_HEIGHT_SCALE = Array(4) { DEFAULT_SIZE_SCALE }
+    // Varnelė Klaviatūra default: taller keys in portrait (index bits: landscape, folded), like Gboard
+    val PREF_KEYBOARD_HEIGHT_SCALE = arrayOf(1.15f, DEFAULT_SIZE_SCALE, 1.15f, DEFAULT_SIZE_SCALE)
     @JvmField
     val PREF_BOTTOM_ROW_SCALE = Array(4) { DEFAULT_SIZE_SCALE }
     @JvmField

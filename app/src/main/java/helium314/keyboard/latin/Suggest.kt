@@ -191,7 +191,9 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         val consideredWord = typedWordString.dropLast(trailingSingleQuotesCount)
         val firstAndTypedEmptyInfos by lazy { getEmptyWordSuggestions() }
 
-        val scoreLimit = Settings.getValues().mScoreLimitForAutocorrect
+        val forVarnele = VarneleDictionary.isAvailable(mDictionaryFacilitator.currentLocale)
+        val scoreLimit = Settings.getValues().let { if (forVarnele) it.mVarneleScoreLimitForAutocorrect else it.mScoreLimitForAutocorrect }
+        val threshold = if (forVarnele) Settings.getValues().mVarneleAutoCorrectionThreshold else mAutoCorrectionThreshold
         // We allow auto-correction if whitelisting is not required or the word is whitelisted,
         // or if the word had more than one char and was not suggested.
         val allowsToBeAutoCorrected: Boolean
@@ -249,7 +251,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                 // mFirstSuggestionExceedsConfidenceThreshold is always set to false, so currently this branch is useless
                 return true to true
             }
-            if (!AutoCorrectionUtils.suggestionExceedsThreshold(firstSuggestion, consideredWord, mAutoCorrectionThreshold)) {
+            if (!AutoCorrectionUtils.suggestionExceedsThreshold(firstSuggestion, consideredWord, threshold)) {
                 // Score is too low for autocorrect
                 // todo: maybe also do something here depending on ngram context?
                 return true to false

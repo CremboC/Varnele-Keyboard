@@ -1,8 +1,23 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.screens
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import helium314.keyboard.latin.inputlogic.VarneleTapLog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import androidx.compose.runtime.collectAsState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +67,10 @@ fun VarneleScreen(
         Settings.PREF_VARNELE_GHOST_NEXT,
         Settings.PREF_VARNELE_LEARN,
         SettingsWithoutKey.VARNELE_FORGET,
+        R.string.settings_category_varnele_accuracy,
+        Settings.PREF_VARNELE_TAP_LOG,
+        SettingsWithoutKey.VARNELE_TAP_LOG_EXPORT,
+        SettingsWithoutKey.VARNELE_TAP_LOG_DELETE,
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -111,6 +130,54 @@ fun createVarneleSettings(context: Context) = listOf(
                 onConfirmed = { VarneleUserLm.forget() },
                 content = { Text(stringResource(R.string.varnele_forget_confirm)) },
                 confirmButtonText = stringResource(R.string.varnele_forget_button),
+            )
+        }
+    },
+    Setting(context, Settings.PREF_VARNELE_TAP_LOG,
+        R.string.varnele_tap_log, R.string.varnele_tap_log_summary
+    ) {
+        SwitchPreference(it, Defaults.PREF_VARNELE_TAP_LOG)
+    },
+    Setting(context, SettingsWithoutKey.VARNELE_TAP_LOG_EXPORT, R.string.varnele_tap_log_export) { setting ->
+        val ctx = LocalContext.current
+        val scope = rememberCoroutineScope()
+        var count by remember { mutableIntStateOf(-1) }
+        LaunchedEffect(Unit) { count = withContext(Dispatchers.IO) { VarneleTapLog.count(ctx) } }
+        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val uri = result.data?.data ?: return@rememberLauncherForActivityResult
+            scope.launch(Dispatchers.IO) {
+                ctx.contentResolver.openOutputStream(uri)?.use { VarneleTapLog.export(ctx, it) }
+            }
+        }
+        Preference(
+            name = setting.title,
+            description = if (count > 0) stringResource(R.string.varnele_tap_log_export_summary, count)
+                else stringResource(R.string.varnele_tap_log_none),
+            onClick = {
+                if (count <= 0) return@Preference
+                val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Calendar.getInstance().time)
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .setType("text/tab-separated-values")
+                    .putExtra(Intent.EXTRA_TITLE, "varnele_taps_$date.tsv")
+                launcher.launch(intent)
+            },
+        )
+    },
+    Setting(context, SettingsWithoutKey.VARNELE_TAP_LOG_DELETE, R.string.varnele_tap_log_delete) { setting ->
+        val ctx = LocalContext.current
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+        Preference(
+            name = setting.title,
+            onClick = { showConfirmDialog = true },
+        )
+        if (showConfirmDialog) {
+            ConfirmationDialog(
+                onDismissRequest = { showConfirmDialog = false },
+                onConfirmed = { VarneleTapLog.delete(ctx) },
+                content = { Text(stringResource(R.string.varnele_tap_log_delete_confirm)) },
+                confirmButtonText = stringResource(R.string.varnele_tap_log_delete_button),
             )
         }
     },

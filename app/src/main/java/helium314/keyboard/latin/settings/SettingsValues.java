@@ -157,6 +157,7 @@ public class SettingsValues {
     public final boolean mVarneleFixEarlier;
     public final boolean mVarneleUnderline;
     public final boolean mVarneleGhostNext;
+    public final boolean mVarneleTapLog;
     public final boolean mAutoCorrectCapitalizedSuggestion;
     public final boolean mBackspaceRevertsAutocorrect;
     public final boolean mAutoCorrectShortcuts;
@@ -175,6 +176,9 @@ public class SettingsValues {
     public final boolean mAutoCorrectEnabled;
     public final float mAutoCorrectionThreshold;
     public final int mScoreLimitForAutocorrect;
+    // Varnelė Klaviatūra: Lithuanian keeps the confidence Varnelė's scores are calibrated for, whatever the slider says
+    public final float mVarneleAutoCorrectionThreshold;
+    public final int mVarneleScoreLimitForAutocorrect;
     public final SettingsValuesForSuggestion mSettingsValuesForSuggestion;
     public final boolean mIsLocked;
 
@@ -235,16 +239,17 @@ public class SettingsValues {
         mVarneleFixEarlier = prefs.getBoolean(Settings.PREF_VARNELE_FIX_EARLIER, Defaults.PREF_VARNELE_FIX_EARLIER);
         mVarneleUnderline = prefs.getBoolean(Settings.PREF_VARNELE_UNDERLINE, Defaults.PREF_VARNELE_UNDERLINE);
         mVarneleGhostNext = prefs.getBoolean(Settings.PREF_VARNELE_GHOST_NEXT, Defaults.PREF_VARNELE_GHOST_NEXT);
+        mVarneleTapLog = prefs.getBoolean(Settings.PREF_VARNELE_TAP_LOG, Defaults.PREF_VARNELE_TAP_LOG);
         mAutoCorrectEnabled = mAutoCorrectionEnabledPerUserSettings
                 && (mInputAttributes.mInputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
                 && (mUrlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.mInputType));
         mCenterSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER);
         float autoCorrectConfidence = prefs.getFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, Defaults.PREF_AUTO_CORRECT_CONFIDENCE);
         // confidence -> threshold and score limit are just some formulas that give something similar to the old values, so that confidence can be in a nice 0-1 range
-        mAutoCorrectionThreshold = mAutoCorrectEnabled
-                ? 0.5f - 0.5f * (float)Math.pow(autoCorrectConfidence, 0.33)
-                : Float.MAX_VALUE;
-        mScoreLimitForAutocorrect = (int)((1.14 - 0.2 * Math.pow(autoCorrectConfidence + 0.47, 3.5)) * 900000);
+        mAutoCorrectionThreshold = autoCorrectionThreshold(autoCorrectConfidence);
+        mScoreLimitForAutocorrect = scoreLimitForAutocorrect(autoCorrectConfidence);
+        mVarneleAutoCorrectionThreshold = autoCorrectionThreshold(Defaults.VARNELE_AUTO_CORRECT_CONFIDENCE);
+        mVarneleScoreLimitForAutocorrect = scoreLimitForAutocorrect(Defaults.VARNELE_AUTO_CORRECT_CONFIDENCE);
         mAutoCorrectCapitalizedSuggestion = prefs.getBoolean(Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION, Defaults.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION);
         mAutoCorrectShortcuts = prefs.getBoolean(Settings.PREF_AUTOCORRECT_SHORTCUTS, Defaults.PREF_AUTOCORRECT_SHORTCUTS);
         mBackspaceRevertsAutocorrect = prefs.getBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, Defaults.PREF_BACKSPACE_REVERTS_AUTOCORRECT);
@@ -359,6 +364,14 @@ public class SettingsValues {
     public boolean needsToLookupSuggestions() {
         return (mInputAttributes.mShouldShowSuggestions || mOverrideShowingSuggestions)
                 && (mAutoCorrectEnabled || mSuggestionsEnabled);
+    }
+
+    private float autoCorrectionThreshold(final float confidence) {
+        return mAutoCorrectEnabled ? 0.5f - 0.5f * (float)Math.pow(confidence, 0.33) : Float.MAX_VALUE;
+    }
+
+    private static int scoreLimitForAutocorrect(final float confidence) {
+        return (int)((1.14 - 0.2 * Math.pow(confidence + 0.47, 3.5)) * 900000);
     }
 
     public boolean isWordSeparator(final int code) {

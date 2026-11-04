@@ -88,6 +88,7 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_VARNELE_FIX_EARLIER = "varnele_fix_earlier";
     public static final String PREF_VARNELE_UNDERLINE = "varnele_underline";
     public static final String PREF_VARNELE_GHOST_NEXT = "varnele_ghost_next";
+    public static final String PREF_VARNELE_TAP_LOG = "varnele_tap_log";
     public static final String PREF_BACKSPACE_REVERTS_AUTOCORRECT = "backspace_reverts_autocorrect";
     public static final String PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION = "autocorrect_capitalized_suggestion";
     public static final String PREF_CENTER_SUGGESTION_TEXT_TO_ENTER = "center_suggestion_text_to_enter";

@@ -1934,6 +1934,7 @@ public final class InputLogic {
      * @param inputTransaction The transaction in progress.
      */
     private void revertCommit(final InputTransaction inputTransaction) {
+        VarneleTapLog.INSTANCE.onRevert();
         final CharSequence originallyTypedWord = mLastComposedWord.mTypedWord;
         final CharSequence committedWord = mLastComposedWord.mCommittedWord;
         final String committedWordString = committedWord.toString();
@@ -2433,6 +2434,8 @@ public final class InputLogic {
      */
     private void commitChosenWord(final SettingsValues settingsValues, final String chosenWord,
             final int commitType, final String separatorString) {
+        if (mWordComposer.isComposingWord())
+            VarneleTapLog.INSTANCE.onCommit(mWordComposer, chosenWord, settingsValues, getDictionaryFacilitatorLocale());
         long startTimeMillis = 0;
         if (DebugFlags.DEBUG_ENABLED) {
             startTimeMillis = SystemClock.elapsedRealtime();
