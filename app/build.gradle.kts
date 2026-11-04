@@ -89,6 +89,12 @@ android {
         }
     }
 
+    // Varnelė's data (asset varnele.bin) is read in place (memory-mapped), so it must not be compressed
+    androidResources {
+        noCompress += "bin"
+    }
+    sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("varnele-assets").get().asFile)
+
     buildFeatures {
         viewBinding = true
         buildConfig = true
@@ -214,4 +220,13 @@ val cargoBuildVarnele by tasks.registering(Exec::class) {
     )
 }
 
-tasks.named("preBuild") { dependsOn(cargoBuildVarnele) }
+val copyVarneleData by tasks.registering(Copy::class) {
+    description = "Ship data/varnele.bin as an asset: once, not inside the library for every CPU type"
+    dependsOn(exportVarneleData)
+    val dir = varneleDir()
+    onlyIf { dir.isDirectory }
+    from(File(dir, "data/varnele.bin"))
+    into(layout.buildDirectory.dir("varnele-assets"))
+}
+
+tasks.named("preBuild") { dependsOn(cargoBuildVarnele, copyVarneleData) }

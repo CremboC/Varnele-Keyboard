@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package dev.imbrasas.varnele
 
+import android.content.Context
 import android.util.Log
+import java.io.FileInputStream
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -59,13 +63,43 @@ object Native {
     @Volatile
     private var userLoaded = false
 
-    /** False if the library is missing for this CPU type; the keyboard then works without Varnelė. */
-    val available: Boolean = try {
+    private val libraryLoaded: Boolean = try {
         System.loadLibrary("varnele_android")
         true
     } catch (e: UnsatisfiedLinkError) {
         Log.w("Varnele", "native library not available", e)
         false
+    }
+
+    /** The data file (asset varnele.bin), memory-mapped: the library reads it in place, so it is kept. */
+    @Volatile
+    private var data: ByteBuffer? = null
+
+    /**
+     * False if the library is missing for this CPU type or its data could not be mapped; the
+     * keyboard then works without Varnelė.
+     */
+    val available: Boolean get() = data != null
+
+    @JvmStatic
+    private external fun dataNative(data: ByteBuffer)
+
+    /** Hands the library its data (App.onCreate, before anything else; later calls do nothing). */
+    @Synchronized
+    fun init(context: Context) {
+        if (!libraryLoaded || data != null) return
+        try {
+            // stored uncompressed (noCompress in app/build.gradle.kts), so it can be mapped from the APK
+            val buf = context.assets.openFd("varnele.bin").use { fd ->
+                FileInputStream(fd.fileDescriptor).use {
+                    it.channel.map(FileChannel.MapMode.READ_ONLY, fd.startOffset, fd.declaredLength)
+                }
+            }
+            dataNative(buf)
+            data = buf
+        } catch (e: java.io.IOException) {
+            Log.w("Varnele", "data file not available", e)
+        }
     }
 
     @JvmStatic

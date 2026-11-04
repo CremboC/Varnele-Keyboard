@@ -3,6 +3,7 @@ package helium314.keyboard.latin
 
 import android.app.Application
 import android.os.Build
+import dev.imbrasas.varnele.Native
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.define.DebugFlags
 import helium314.keyboard.latin.settings.Defaults
@@ -21,6 +22,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         DebugFlags.init(this)
+        Native.init(this) // Varnelė's data, before any dictionary asks for it
         FoldableUtils.init(this)
         Settings.init(this)
         SubtypeSettings.init(this)
