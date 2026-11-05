@@ -358,7 +358,8 @@ public final class InputLogic {
         // earlier words and commas it reveals (the picked word itself stays as chosen)
         if (!suggestionInfo.isEmoji() && settingsValues.mAutoCorrectEnabled
                 && VarneleSentenceFixer.INSTANCE.isActive(mDictionaryFacilitator.getCurrentLocale())) {
-            VarneleSentenceFixer.INSTANCE.apply(mConnection, true);
+            if (VarneleSentenceFixer.INSTANCE.apply(mConnection, true))
+                mVarneleTextAfter = null; // the text after the cursor may have changed
         }
         if (!suggestionInfo.isEmoji())
             VarneleUserLm.INSTANCE.observe(mConnection, settingsValues, mDictionaryFacilitator.getCurrentLocale());
@@ -581,7 +582,8 @@ public final class InputLogic {
                 // gesture's word is finished here: fix it and the earlier words and commas it reveals
                 if (settingsValues.mAutoCorrectEnabled
                         && VarneleSentenceFixer.INSTANCE.isActive(mDictionaryFacilitator.getCurrentLocale())) {
-                    VarneleSentenceFixer.INSTANCE.apply(mConnection);
+                    if (VarneleSentenceFixer.INSTANCE.apply(mConnection))
+                        mVarneleTextAfter = null;
                 }
                 VarneleUserLm.INSTANCE.observe(mConnection, settingsValues, mDictionaryFacilitator.getCurrentLocale());
             }
@@ -1270,6 +1272,7 @@ public final class InputLogic {
         if (wasComposingWord && settingsValues.mAutoCorrectEnabled
                 && VarneleSentenceFixer.INSTANCE.isActive(mDictionaryFacilitator.getCurrentLocale())
                 && VarneleSentenceFixer.INSTANCE.apply(mConnection)) {
+            mVarneleTextAfter = null; // the text after the cursor may have changed
             inputTransaction.setRequiresUpdateSuggestions();
         }
         // Varnelė: learn from the text as it ends up, fixes applied (setting)

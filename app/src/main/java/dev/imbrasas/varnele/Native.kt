@@ -148,7 +148,7 @@ object Native {
     private external fun fixUndoneNative()
 
     @JvmStatic
-    private external fun fixNative(before: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean, formal: Boolean): String
+    private external fun fixNative(before: String, after: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean, formal: Boolean): String
 
     /** Autocorrect committed [committed] for [typed]; [before] ends with it, [base] is where it starts in the field. */
     fun fixRemember(before: String, base: Int, typed: String, committed: String) {
@@ -161,15 +161,22 @@ object Native {
     }
 
     /**
-     * The sentence fixer on the text before the cursor: how many UTF-16 units to delete before the
-     * cursor and what to put there, or null if nothing changes.
+     * The sentence fixer's edit: [delete] UTF-16 units before the cursor replaced by [insert]; after the
+     * cursor, [skip] units left as they are, then [deleteAfter] units replaced by [insertAfter], the cursor
+     * staying where it is (after [insert]).
      */
-    fun fixSentence(before: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean): Pair<Int, String>? {
+    data class SentenceEdit(val delete: Int, val insert: String, val skip: Int, val deleteAfter: Int, val insertAfter: String)
+
+    /**
+     * The sentence fixer on the sentence around the cursor: [before] the text before it, [after] the text
+     * after it ("" if none or unknown; the words after the cursor are fixed too), [base] where [before]
+     * starts in the field. Null if nothing changes.
+     */
+    fun fixSentence(before: String, after: String, base: Int, picked: Boolean, earlier: Boolean, commas: Boolean): SentenceEdit? {
         if (!available) return null
-        val o = JSONObject(fixNative(before, base, picked, earlier, commas, formal))
-        val delete = o.getInt("delete")
-        val insert = o.getString("insert")
-        return if (delete == 0 && insert.isEmpty()) null else delete to insert
+        val o = JSONObject(fixNative(before, after, base, picked, earlier, commas, formal))
+        val e = SentenceEdit(o.getInt("delete"), o.getString("insert"), o.getInt("skip"), o.getInt("deleteAfter"), o.getString("insertAfter"))
+        return if (e.delete == 0 && e.insert.isEmpty() && e.deleteAfter == 0 && e.insertAfter.isEmpty()) null else e
     }
 
     @JvmStatic private external fun userLoadNative(path: String)
