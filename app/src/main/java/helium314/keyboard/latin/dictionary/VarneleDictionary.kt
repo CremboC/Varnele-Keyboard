@@ -66,7 +66,7 @@ class VarneleDictionary(
         // a word inside a sentence (typed or touched with the cursor back in the text): the words
         // after it decide too ("kad žiema žymiai rimtesne| negu" -> rimtesnė)
         val sentence = sentenceAround()
-        val context = sentence?.first ?: previousWords(ngramContext)
+        val context = sentence?.first ?: previousWords(ngramContext).ifEmpty { sentenceSoFar() }
         val after = sentence?.second ?: ""
         val t = System.nanoTime()
         val r = Native.check(typed, context, keyShiftEnabled(), after) ?: return out
@@ -202,6 +202,19 @@ class VarneleDictionary(
     override fun getMaxFrequencyOfExactMatches(word: String): Int = getFrequency(word)
 
     /** Up to three previous words of the current sentence, oldest first. */
+    /**
+     * The sentence before the word, its last 80 characters, when HeliBoard's n-gram context is empty although
+     * the sentence has words: after a comma, colon, quote or bracket (Labas, Boruta: Boruta is a name inside
+     * a sentence, not a sentence start).
+     */
+    private fun sentenceSoFar(): String {
+        val before = textBefore
+        var start = before.length
+        while (start > 0 && before[start - 1] !in SENTENCE_ENDS) start--
+        val s = before.substring(maxOf(start, before.length - 80)).trim()
+        return if (s.any { it.isLetter() }) s else ""
+    }
+
     private fun previousWords(ngramContext: NgramContext): String {
         val words = ArrayList<String>()
         for (n in 1..3) {
