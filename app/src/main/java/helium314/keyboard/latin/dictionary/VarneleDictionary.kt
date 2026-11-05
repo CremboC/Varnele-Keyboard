@@ -294,7 +294,7 @@ class VarneleDictionary(
             resumed = word to spanWords
         }
 
-        private const val SENTENCE_ENDS = ".!?\n"
+        private const val SENTENCE_ENDS = ".!?…\n"
 
         /** Marks the ghost in the strip (SuggestionStripLayoutHelper greys its completed part). */
         @JvmField
