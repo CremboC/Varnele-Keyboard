@@ -82,6 +82,12 @@ public class KeyDetector {
         final int touchX = getTouchX(x);
         final int touchY = getTouchY(y);
 
+        final VarneleTouchModel.Shifts shifts = VarneleTouchModel.shiftsFor(mKeyboard);
+        if (shifts != null) {
+            final Key key = shifts.detect(mKeyboard.getNearestKeys(touchX, touchY), touchX, touchY);
+            if (key != null) return key;
+        }
+
         int minDistance = Integer.MAX_VALUE;
         Key primaryKey = null;
         for (final Key key: mKeyboard.getNearestKeys(touchX, touchY)) {

@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import helium314.keyboard.keyboard.VarneleTouchModel
 import helium314.keyboard.latin.inputlogic.VarneleTapLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,6 +69,8 @@ fun VarneleScreen(
         Settings.PREF_VARNELE_LEARN,
         SettingsWithoutKey.VARNELE_FORGET,
         R.string.settings_category_varnele_accuracy,
+        Settings.PREF_VARNELE_TOUCH_MODEL,
+        SettingsWithoutKey.VARNELE_TOUCH_FORGET,
         Settings.PREF_VARNELE_TAP_LOG,
         SettingsWithoutKey.VARNELE_TAP_LOG_EXPORT,
         SettingsWithoutKey.VARNELE_TAP_LOG_DELETE,
@@ -129,6 +132,30 @@ fun createVarneleSettings(context: Context) = listOf(
                 onDismissRequest = { showConfirmDialog = false },
                 onConfirmed = { VarneleUserLm.forget() },
                 content = { Text(stringResource(R.string.varnele_forget_confirm)) },
+                confirmButtonText = stringResource(R.string.varnele_forget_button),
+            )
+        }
+    },
+    Setting(context, Settings.PREF_VARNELE_TOUCH_MODEL,
+        R.string.varnele_touch_model, R.string.varnele_touch_model_summary
+    ) {
+        SwitchPreference(it, Defaults.PREF_VARNELE_TOUCH_MODEL)
+    },
+    Setting(context, SettingsWithoutKey.VARNELE_TOUCH_FORGET,
+        R.string.varnele_touch_forget, R.string.varnele_touch_forget_summary
+    ) { setting ->
+        val ctx = LocalContext.current
+        var showConfirmDialog by rememberSaveable { mutableStateOf(false) }
+        Preference(
+            name = setting.title,
+            description = setting.description,
+            onClick = { showConfirmDialog = true },
+        )
+        if (showConfirmDialog) {
+            ConfirmationDialog(
+                onDismissRequest = { showConfirmDialog = false },
+                onConfirmed = { VarneleTouchModel.forget(ctx.filesDir) },
+                content = { Text(stringResource(R.string.varnele_touch_forget_confirm)) },
                 confirmButtonText = stringResource(R.string.varnele_forget_button),
             )
         }

@@ -78,6 +78,7 @@ object Defaults {
     const val PREF_VARNELE_UNDERLINE = true
     const val PREF_VARNELE_GHOST_NEXT = true
     const val PREF_VARNELE_TAP_LOG = false
+    const val PREF_VARNELE_TOUCH_MODEL = true
     const val PREF_BACKSPACE_REVERTS_AUTOCORRECT = true
     const val PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION = true
     const val PREF_CENTER_SUGGESTION_TEXT_TO_ENTER = false

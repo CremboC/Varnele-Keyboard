@@ -450,6 +450,11 @@
     <string name="varnele_forget_button">Pamiršti</string>
     <string name="varnele_formal_summary">Šnekamosios formos taisomos į bendrines ir niekada nesiūlomos, rašant ar braukiant (valgyt → valgyti, einam → einame)</string>
     <string name="settings_category_varnele_accuracy">Rašymo tikslumas</string>
+    <string name="varnele_touch_model">Pritaikyti klavišus prie mano rašymo</string>
+    <string name="varnele_touch_model_summary">Iš paliktų žodžių mokosi, kur jūsų palietimai patenka ant kiekvieno klavišo, ir pagal tai paslenka klavišų palietimo sritis. Bet kuria kalba; saugomas tik kiekvieno klavišo vidurkis, jokio teksto</string>
+    <string name="varnele_touch_forget">Pamiršti, kaip spaudžiu klavišus</string>
+    <string name="varnele_touch_forget_summary">Grąžinti visų klavišų palietimo sritis į vietas</string>
+    <string name="varnele_touch_forget_confirm">Pamiršti, kur jūsų palietimai patenka ant klavišų?</string>
     <string name="varnele_tap_log">Įrašyti rašymo tikslumą</string>
     <string name="varnele_tap_log_summary">Įsiminti, kur kiekvienas palietimas patenka ant norėto klavišo, kad klaviatūrą būtų galima pritaikyti jūsų pirštams. Eilutės sumaišomos, todėl teksto atkurti negalima; lieka šiame telefone, kol jų neeksportuojate; ne inkognito režimu, ne slaptažodžiuose ir adresuose</string>
     <string name="varnele_tap_log_export">Eksportuoti rašymo tikslumo duomenis</string>

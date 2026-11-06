@@ -313,6 +313,8 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         PointerTracker.setKeyDetector(mKeyDetector);
         VarneleDictionary.setGestureKeyboard(keyboard, -getPaddingLeft(), -getPaddingTop() + getVerticalCorrection());
         VarneleTapLog.setKeyboard(keyboard);
+        VarneleTouchModel.setKeyboard(keyboard, VarneleTouchModel.screenKey(getResources().getConfiguration(), keyboard),
+                Settings.getValues().mVarneleTouchModel);
         mPopupKeysKeyboardCache.clear();
 
         mSpaceKey = keyboard.getKey(Constants.CODE_SPACE);

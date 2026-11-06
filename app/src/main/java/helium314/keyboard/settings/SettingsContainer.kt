@@ -89,4 +89,5 @@ object SettingsWithoutKey {
     const val VARNELE_FORGET = "varnele_forget"
     const val VARNELE_TAP_LOG_EXPORT = "varnele_tap_log_export"
     const val VARNELE_TAP_LOG_DELETE = "varnele_tap_log_delete"
+    const val VARNELE_TOUCH_FORGET = "varnele_touch_forget"
 }

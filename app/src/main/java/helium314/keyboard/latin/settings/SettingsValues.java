@@ -158,6 +158,7 @@ public class SettingsValues {
     public final boolean mVarneleUnderline;
     public final boolean mVarneleGhostNext;
     public final boolean mVarneleTapLog;
+    public final boolean mVarneleTouchModel;
     public final boolean mAutoCorrectCapitalizedSuggestion;
     public final boolean mBackspaceRevertsAutocorrect;
     public final boolean mAutoCorrectShortcuts;
@@ -240,6 +241,7 @@ public class SettingsValues {
         mVarneleUnderline = prefs.getBoolean(Settings.PREF_VARNELE_UNDERLINE, Defaults.PREF_VARNELE_UNDERLINE);
         mVarneleGhostNext = prefs.getBoolean(Settings.PREF_VARNELE_GHOST_NEXT, Defaults.PREF_VARNELE_GHOST_NEXT);
         mVarneleTapLog = prefs.getBoolean(Settings.PREF_VARNELE_TAP_LOG, Defaults.PREF_VARNELE_TAP_LOG);
+        mVarneleTouchModel = prefs.getBoolean(Settings.PREF_VARNELE_TOUCH_MODEL, Defaults.PREF_VARNELE_TOUCH_MODEL);
         mAutoCorrectEnabled = mAutoCorrectionEnabledPerUserSettings
                 && (mInputAttributes.mInputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
                 && (mUrlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.mInputType));
